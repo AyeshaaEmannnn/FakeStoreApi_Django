@@ -51,25 +51,22 @@ class ProductView(APIView):
         return Response({'data':'data id deleted'},status=204)
     
     
-class ProductDetailView(RetrieveAPIView):    # RetrieveAPIView is a DRF generic view used to retrieve one object.
-    queryset = Product.objects.all()     # queryset tells DRF where to search
-    serializer_class = ProductSerializer      #	Tells the view which serializer to use for converting data
+class ProductDetailView(RetrieveAPIView):    
+    queryset = Product.objects.all()     
+    serializer_class = ProductSerializer     
     
 class ProductCategoryList(APIView):
     def get(self,request):
-        categories=Product.objects.values_list('category', flat=True).distinct() #.values_list('category', flat=True) grabs just the category field from the DB.  .distinct() ensures there are no duplicates.
+        categories=Product.objects.values_list('category', flat=True).distinct() 
         return Response(categories)
     
-class ProductsByCategory(ListAPIView):  #ListAPIView is a DRF generic view for listing multiple objects.
+class ProductsByCategory(ListAPIView):  
     serializer_class = ProductSerializer
 
-    def get_queryset(self):                #get_queryset() customizes which products to show:
-        category = self.kwargs['category']           #It grabs the category from the URL (e.g., "jewellery").
-        return Product.objects.filter(category__iexact=category) # __iexact (case-insensitive) to filter matching category products.
+    def get_queryset(self):                
+        category = self.kwargs['category']           
+        return Product.objects.filter(category__iexact=category) 
     
-# retriveAPIview ham tab use kare gy jab koi aik object retrive karna hoga queryset btata hy k kis jga search hogi us object k liye or wo hmary model k tamam objects my search kare ga  and serializer_class btati hy views ko k kis serializer ko use karna hy data k liye
-# next categorylist k liye ham aik get ki api bna rahy hain data ko show krny k liye categories aik variable hy jismy hmary models k objects my sy aik list aae gi jo list categories ki hogi. flat=True gives a list instead of tuple .distinct function kesi bhi value ko repeat hony sy rokta hy
-# listAPIview hame multiple objects ko list krny my help karta hy class_serializer btae ga k konsa serializer my sy data use krna then queryset function customize kre ga k konsy objects show hon gy category variable hy jo url my sy category ko store karee ga product.objects.filter ye filter kree ga sab rows ko or matching rows show kare ga category hmari database ki field hy or iexact case insensitive bnaee ga usko
 
 
 class SignupView(APIView):
@@ -92,9 +89,9 @@ class CartCreateView(APIView):
     def post(self, request):
         serializer = CartSerializer(data=request.data)
         if serializer.is_valid():
-            cart = serializer.save()     #calls the create() method,Extracts userId and products from the input JSON.Creates a new Cart.Creates related CartItem
-            return Response(CartSerializer(cart).data, status=201)  #Serialize the cart again using CartSerializer(cart) — this turns it into JSON.
-                                                                    #.data returns the serialized dictionary.
+            cart = serializer.save()    
+            return Response(CartSerializer(cart).data, status=201)  
+                                                                    
         return Response(serializer.errors, status=400)
     def get(self,request):
         data=Cart.objects.all()
@@ -103,15 +100,15 @@ class CartCreateView(APIView):
 
 class CartQueryView(APIView):
     def get(self, request):
-        user_id = request.query_params.get('userId')  # Get the user id from query string
+        user_id = request.query_params.get('userId')  
         if not user_id:
             return Response({"error": "userId is required in query params"}, status=400)
 
-        carts = Cart.objects.filter(user_id=user_id) #matches the user id
+        carts = Cart.objects.filter(user_id=user_id) 
         if not carts.exists():
             return Response({"message": "No cart found for this user"}, status=404)
 
-        serializer = CartSerializer(carts, many=True) # return all carts of spaecific user
+        serializer = CartSerializer(carts, many=True) 
         return Response(serializer.data, status=200)
 
 

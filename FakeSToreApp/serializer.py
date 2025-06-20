@@ -57,39 +57,34 @@ class LoginSerializer(serializers.Serializer):
         return data
     
 class CartItemSerializer(serializers.ModelSerializer):
-    productId = serializers.IntegerField(source='product.id')  #productid name show hoga or product.id the actual path
-                                                                #where it comes from
+    productId = serializers.IntegerField(source='product.id')  
 
     class Meta:
         model = CartItem
         fields = ['productId', 'quantity']
         
 class CartSerializer(serializers.ModelSerializer):
-    userId = serializers.IntegerField(source='user.id')                 #same as above
-    date = serializers.DateTimeField(format='%Y-%m-%dT%H:%M:%S.000Z',read_only=True)  #automatic add when object is  
-                                                                                        # created 
-    products = CartItemSerializer(many=True)              # products feild my opr wala serializer ae ga or many=True agr aik ay zyda hue to unko bi jsaon my karee ga
-    _v = serializers.SerializerMethodField()            # ye method feild sy aae ga 
+    userId = serializers.IntegerField(source='user.id')                
+    date = serializers.DateTimeField(format='%Y-%m-%dT%H:%M:%S.000Z',read_only=True)   
+    products = CartItemSerializer(many=True)              
+    _v = serializers.SerializerMethodField()            
     
     class Meta:
         model = Cart
         fields = ['id', 'userId', 'date', 'products', '_v'] 
 
-    def get__v(self, obj):              #to get v
+    def get__v(self, obj):              
         return 0
     
     def create(self, validated_data):
-      user_id = validated_data['user']['id']           # validated_data['user'] comes from source='user.id' in the    
-                                                    #serializer.This gets the actual user ID from the nested input and stores it in user_id.
-      products_data = validated_data.pop('products')  #.pop('products') removes the 'products' list from 
-                                                        #validated_data and stores it separately.
+      user_id = validated_data['user']['id']          
+      products_data = validated_data.pop('products')  
 
-      cart = Cart.objects.create(user_id=user_id)       # new Cart is created in the database for this user.        
-                                                        #user_id=user_id assigns the cart to the correct user.
+      cart = Cart.objects.create(user_id=user_id)       
       for item in products_data:
         CartItem.objects.create(
-            cart=cart,                              #cart=cart — link the item to the newly created cart.
-            product_id=item['product']['id'],       #product_id=item['product']['id'] — extract the product ID.
-            quantity=item['quantity']               #quantity=item['quantity'] — extract quantity.
+            cart=cart,                             
+            product_id=item['product']['id']       
+            quantity=item['quantity']               
         )
       return cart
