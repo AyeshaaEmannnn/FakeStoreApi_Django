@@ -2,34 +2,30 @@ from .models import *
 from rest_framework import serializers
 
 class ProductSerializer(serializers.ModelSerializer):
-    rating = serializers.SerializerMethodField()   #read-only field computed by custom method
+    rating = serializers.SerializerMethodField()   
 
     class Meta:
         model = Product
         fields = ['id', 'title', 'price', 'description', 'category', 'image', 'rating']
 
-    def get_rating(self, obj):   # When the serializer outputs JSON, this method is called for the rating field.It returns a dictionary containing the product's rate and count
+    def get_rating(self, obj):   
         return {
             'rate': obj.rate,
             'count': obj.count
         }
     def create(self, validated_data):
-        # Extract 'rating' from the input data
+       
         rating_data = self.initial_data.get('rating', {})
         rate = rating_data.get('rate')
         count = rating_data.get('count')
 
-        # Add 'rate' and 'count' manually to validated_data
+       
         validated_data['rate'] = rate
         validated_data['count'] = count
 
         return Product.objects.create(**validated_data)
     
-#     self.initial_data gives the raw input JSON data.
-# It extracts the rating dict from the input (which normally would be ignored because rating is read-only).
-# Pulls out rate and count from the rating.
-# Adds these values into validated_data so they can be saved in the model.
-# Creates a new Product instance using Product.objects.create(...).
+
 
 
 class SingupSerializer(serializers.ModelSerializer):
